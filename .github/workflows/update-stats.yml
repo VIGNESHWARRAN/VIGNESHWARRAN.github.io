@@ -28,3 +28,4 @@ jobs:
           git diff --cached --quiet || \
             git commit -m "Update LeetCode stats"
           git push
+      - run: npm run deploy
