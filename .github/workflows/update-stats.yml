@@ -16,16 +16,28 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - run: npm ci
       - run: node scripts/update-stats.js
 
+      # 1. Commit and push updated stats.json back to main
       - run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add public/stats.json
           git diff --cached --quiet || \
             git commit -m "Update LeetCode stats"
           git push
-      - run: npm run deploy
+
+      # 2. Build Next.js static export (creates ./out directory)
+      - run: npm run build
+
+      # 3. Deploy the ./out directory to gh-pages branch
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
